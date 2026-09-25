@@ -10,43 +10,21 @@ st.set_page_config(
 st.title("🎬 My AI Video Creator")
 st.write("Create a short AI-generated video from your idea.")
 
-st.header("1. Write your video idea")
-
 idea = st.text_area(
     "What should the video be about?",
-    placeholder=(
-        "Example: A small friendly robot stands in a colourful garden. "
-        "A yellow butterfly lands on the robot's hand."
-    ),
+    placeholder="Example: A friendly robot sees a butterfly in a colourful garden.",
     height=140
 )
 
-st.header("2. Choose a character")
-
 character = st.selectbox(
-    "Choose one character:",
-    [
-        "Friendly Robot",
-        "Cartoon Boy",
-        "Cartoon Girl",
-        "Fox",
-        "Bear"
-    ]
+    "Choose a character:",
+    ["Friendly Robot", "Cartoon Boy", "Cartoon Girl", "Fox", "Bear"]
 )
-
-st.header("3. Choose a style")
 
 style = st.selectbox(
     "Choose a video style:",
-    [
-        "2D Cartoon",
-        "3D Animation",
-        "Storybook",
-        "Educational"
-    ]
+    ["2D Cartoon", "3D Animation", "Storybook", "Educational"]
 )
-
-st.header("4. Choose video shape")
 
 video_shape = st.selectbox(
     "Where will you post the video?",
@@ -57,10 +35,7 @@ video_shape = st.selectbox(
     ]
 )
 
-st.warning(
-    "This creates a real AI video and may use Replicate credits. "
-    "For now, generate only one short test video."
-)
+st.warning("Generating a real AI video may use Replicate credits. Generate only one test video.")
 
 if st.button("🎬 Generate my short video", type="primary"):
 
@@ -68,10 +43,45 @@ if st.button("🎬 Generate my short video", type="primary"):
         st.warning("Please write a video idea first.")
 
     elif "REPLICATE_API_TOKEN" not in st.secrets:
-        st.error(
-            "Your Replicate token cannot be found. "
-            "Go to Streamlit App Settings → Secrets and save it again."
-        )
+        st.error("Replicate token is missing. Check Streamlit App Settings and Secrets.")
 
     else:
-        prompt =
+        prompt = (
+            "Create a high-quality 5-second " + style + " animated video. "
+            "Main character: " + character + ". "
+            "Story: " + idea + " "
+            "Video format: " + video_shape + ". "
+            "Use bright lighting, clear action, smooth motion, a family-friendly tone, "
+            "consistent character appearance, no subtitles, and no text on screen."
+        )
+
+        st.subheader("Video instruction sent to AI")
+        st.code(prompt, language="text")
+
+        try:
+            with st.spinner("Creating your video. This can take a few minutes..."):
+
+                client = replicate.Client(
+                    api_token=st.secrets["REPLICATE_API_TOKEN"]
+                )
+
+                output = client.run(
+                    "wavespeedai/wan-2.1-t2v-480p",
+                    input={"prompt": prompt}
+                )
+
+            if isinstance(output, list):
+                video_url = str(output[0])
+            else:
+                video_url = str(output)
+
+            st.success("✅ Your AI video is ready!")
+            st.video(video_url)
+            st.link_button("Download your video", video_url)
+
+        except Exception as error:
+            st.error("The video could not be generated.")
+            st.exception(error)
+
+st.divider()
+st.caption("Version 1: Text-to-video test.")
