@@ -85,9 +85,11 @@ consistent character appearance, no subtitles, no text on screen.
                 )
 
                 output = client.run(
-                    "thudm/cogvideox-t2v",
-                    input={
-                        "prompt": prompt
+    "wavespeedai/wan-2.1-t2v-480p",
+    input={
+        "prompt": prompt
+    }
+)
                     }
                 )
 
