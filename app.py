@@ -3,7 +3,8 @@ import replicate
 
 st.set_page_config(
     page_title="My AI Video Creator",
-    page_icon="🎬"
+    page_icon="🎬",
+    layout="centered"
 )
 
 st.title("🎬 My AI Video Creator")
@@ -13,7 +14,11 @@ st.header("1. Write your video idea")
 
 idea = st.text_area(
     "What should the video be about?",
-    placeholder="Example: A friendly robot waves to a butterfly in a colourful garden."
+    placeholder=(
+        "Example: A small friendly robot stands in a colourful garden. "
+        "A yellow butterfly lands on the robot's hand."
+    ),
+    height=140
 )
 
 st.header("2. Choose a character")
@@ -53,56 +58,20 @@ video_shape = st.selectbox(
 )
 
 st.warning(
-    "Generating a video can use Replicate credits. "
-    "Create only one short test video first."
+    "This creates a real AI video and may use Replicate credits. "
+    "For now, generate only one short test video."
 )
 
-if st.button("🎬 Generate my short video"):
+if st.button("🎬 Generate my short video", type="primary"):
+
     if idea.strip() == "":
-        st.warning("Please write an idea first.")
+        st.warning("Please write a video idea first.")
+
     elif "REPLICATE_API_TOKEN" not in st.secrets:
-        st.error("Your Replicate token is missing. Add it in Streamlit Secrets.")
+        st.error(
+            "Your Replicate token cannot be found. "
+            "Go to Streamlit App Settings → Secrets and save it again."
+        )
+
     else:
-        prompt = f"""
-A high-quality 5-second {style} animated video.
-
-Main character: {character}.
-
-Story: {idea}
-
-Format: {video_shape}.
-Bright lighting, clear action, family-friendly, smooth motion,
-consistent character appearance, no subtitles, no text on screen.
-"""
-
-        st.subheader("Your video instruction")
-        st.code(prompt, language="text")
-
-        try:
-            with st.spinner("Creating your video. This can take a few minutes..."):
-                client = replicate.Client(
-                    api_token=st.secrets["REPLICATE_API_TOKEN"]
-                )
-
-                output = client.run(
-    "wavespeedai/wan-2.1-t2v-480p",
-    input={
-        "prompt": prompt
-    }
-)
-                    }
-                )
-
-            st.success("Your video is ready!")
-
-            if isinstance(output, list):
-                video_url = output[0]
-            else:
-                video_url = output
-
-            st.video(video_url)
-            st.markdown(f"[Download your video]({video_url})")
-
-        except Exception as error:
-            st.error("The video could not be generated.")
-            st.exception(error)
+        prompt =
